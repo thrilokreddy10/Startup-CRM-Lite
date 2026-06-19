@@ -1,4 +1,5 @@
-import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import StatusBadge from '../leads/StatusBadge';
 
 /**
  * @typedef {Object} Lead
@@ -21,54 +22,48 @@ import React from 'react';
  * @returns {JSX.Element}
  */
 const RecentLeads = ({ leads }) => {
+  const navigate = useNavigate();
   const recentLeads = [...leads].slice(0, 5);
 
-  const getStatusBadgeClass = (status) => {
-    switch(status) {
-      case 'New': return 'bg-blue-100 text-blue-700';
-      case 'Contacted': return 'bg-indigo-100 text-indigo-700';
-      case 'Qualified': return 'bg-amber-100 text-amber-700';
-      case 'Proposal': return 'bg-orange-100 text-orange-700';
-      case 'Won': return 'bg-green-100 text-green-700';
-      case 'Lost': return 'bg-red-100 text-red-700';
-      default: return 'bg-slate-100 text-slate-700';
-    }
-  };
-
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-      <div className="p-6 border-b border-slate-100 flex justify-between items-center">
-        <h3 className="text-lg font-semibold text-slate-800">Recent Leads</h3>
-        <button className="text-sm text-blue-600 font-medium hover:text-blue-700 transition-colors">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden">
+      <div className="p-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+        <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200">Recent Leads</h3>
+        <button 
+          onClick={() => navigate('/leads')}
+          className="text-sm text-blue-600 font-medium hover:text-blue-700 transition-colors"
+        >
           View All
         </button>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-slate-50 border-b border-slate-100">
-              <th className="py-3 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider">Name</th>
-              <th className="py-3 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider">Company</th>
-              <th className="py-3 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
-              <th className="py-3 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider">Date Added</th>
+            <tr className="bg-slate-50 dark:bg-slate-900 border-b border-slate-100 dark:border-slate-700">
+              <th className="py-3 px-6 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Name</th>
+              <th className="py-3 px-6 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Company</th>
+              <th className="py-3 px-6 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Status</th>
+              <th className="py-3 px-6 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Date Added</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {recentLeads.map((lead) => (
-              <tr key={lead.id} className="hover:bg-slate-50 transition-colors">
-                <td className="py-4 px-6 text-sm font-medium text-slate-800">{lead.name}</td>
-                <td className="py-4 px-6 text-sm text-slate-600">{lead.company}</td>
+              <tr key={lead.id} className="hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-700 transition-colors group">
+                <td className="py-4 px-6 text-sm font-medium text-slate-800 dark:text-slate-200 dark:group-hover:text-white transition-colors">{lead.name}</td>
+                <td className="py-4 px-6 text-sm text-slate-600 dark:text-slate-400 dark:group-hover:text-white transition-colors">{lead.company}</td>
                 <td className="py-4 px-6">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeClass(lead.status)}`}>
-                    {lead.status}
-                  </span>
+                  <StatusBadge status={lead.status} />
                 </td>
-                <td className="py-4 px-6 text-sm text-slate-500">{lead.dateAdded}</td>
+                <td className="py-4 px-6 text-sm text-slate-500 dark:text-slate-400 dark:group-hover:text-white transition-colors">
+                  {lead.createdAt 
+                    ? new Date(lead.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                    : lead.dateAdded}
+                </td>
               </tr>
             ))}
             {recentLeads.length === 0 && (
               <tr>
-                <td colSpan="4" className="py-8 text-center text-slate-500 text-sm">
+                <td colSpan="4" className="py-8 text-center text-slate-500 dark:text-slate-400 text-sm">
                   No recent leads found.
                 </td>
               </tr>

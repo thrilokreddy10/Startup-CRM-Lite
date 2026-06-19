@@ -1,5 +1,4 @@
 // Import the React library, necessary for defining React components
-import React from 'react';
 // Import BrowserRouter from react-router-dom to enable routing functionality.
 // It uses the HTML5 history API to keep the application's UI in sync with the URL.
 import { BrowserRouter } from 'react-router-dom';

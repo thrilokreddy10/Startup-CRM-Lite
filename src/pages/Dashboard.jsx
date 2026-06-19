@@ -1,9 +1,9 @@
-import React from 'react';
 import { Users, DollarSign, Target, Activity } from 'lucide-react';
 import StatsCard from '../components/dashboard/StatsCard';
 import PipelineOverview from '../components/dashboard/PipelineOverview';
 import RecentLeads from '../components/dashboard/RecentLeads';
 import QuickActions from '../components/dashboard/QuickActions';
+import { useLeads } from '../context/LeadContext';
 
 /**
  * Main Dashboard page component assembling all dashboard widgets.
@@ -12,27 +12,17 @@ import QuickActions from '../components/dashboard/QuickActions';
  * @returns {JSX.Element}
  */
 const Dashboard = () => {
-  // Sample data to be replaced with real data in Phase 8
-  const sampleLeads = [
-    { id: '1', name: 'John Doe', company: 'Acme Corp', status: 'New', dateAdded: 'Oct 24, 2023' },
-    { id: '2', name: 'Jane Smith', company: 'TechStart', status: 'Contacted', dateAdded: 'Oct 23, 2023' },
-    { id: '3', name: 'Bob Johnson', company: 'Global Ind.', status: 'Qualified', dateAdded: 'Oct 21, 2023' },
-    { id: '4', name: 'Alice Williams', company: 'Design Co', status: 'Proposal', dateAdded: 'Oct 19, 2023' },
-    { id: '5', name: 'Charlie Brown', company: 'Logistics LLC', status: 'Won', dateAdded: 'Oct 18, 2023' },
-    { id: '6', name: 'Eva Davis', company: 'CloudNet', status: 'New', dateAdded: 'Oct 15, 2023' },
-    { id: '7', name: 'Frank Miller', company: 'DataSys', status: 'Contacted', dateAdded: 'Oct 14, 2023' },
-    { id: '8', name: 'Grace Wilson', company: 'AI Solutions', status: 'Lost', dateAdded: 'Oct 10, 2023' },
-  ];
+  const { leads } = useLeads();
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 md:p-8">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
         
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-slate-800">Dashboard</h1>
-            <p className="text-slate-500 text-sm mt-1">Welcome back! Here's what's happening with your leads today.</p>
+            <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200">Dashboard</h1>
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Welcome back! Here's what's happening with your leads today.</p>
           </div>
         </div>
 
@@ -71,16 +61,15 @@ const Dashboard = () => {
         {/* Pipeline & Quick Actions */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <PipelineOverview leads={sampleLeads} />
+            <PipelineOverview leads={leads} />
           </div>
           <div className="lg:col-span-1">
             <QuickActions />
           </div>
         </div>
 
-        {/* Recent Leads Table */}
         <div className="grid grid-cols-1">
-          <RecentLeads leads={sampleLeads} />
+          <RecentLeads leads={leads} />
         </div>
 
       </div>

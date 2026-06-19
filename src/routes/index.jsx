@@ -1,5 +1,5 @@
-// Import React and tools for lazy loading components
-import React, { lazy, Suspense } from 'react';
+// Import tools for lazy loading components
+import { lazy, Suspense } from 'react';
 // Import routing components from React Router v6
 import { Routes, Route } from 'react-router-dom';
 
@@ -17,7 +17,7 @@ const AppRoutes = () => {
   return (
     // Wrap the entire application in a flex container that spans the screen's height.
     // 'md:flex-row' ensures side-by-side layout on desktop, and 'flex-col' keeps it stacked on mobile (topbar + content).
-    <div className="flex flex-col md:flex-row h-screen bg-gray-50 font-sans text-gray-900 overflow-hidden">
+    <div className="flex flex-col md:flex-row h-screen bg-gray-50 dark:bg-gray-900 font-sans text-gray-900 dark:text-white overflow-hidden max-w-[1440px] mx-auto w-full">
 
       {/* Sidebar handles both the mobile top header and the sliding/fixed side navigation */}
       <Sidebar />

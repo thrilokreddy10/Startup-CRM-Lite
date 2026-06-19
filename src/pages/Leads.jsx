@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Plus, LayoutGrid, List, ArrowUpDown } from 'lucide-react';
 import { Toaster, toast } from 'react-hot-toast';
 import LeadTable from '../components/leads/LeadTable';
@@ -8,24 +9,29 @@ import SearchBar from '../components/common/SearchBar';
 import FilterBar from '../components/common/FilterBar';
 import EmptyState from '../components/common/EmptyState';
 
-// Initial sample data
-const initialLeads = [
-  { id: '1', name: 'John Doe', company: 'Acme Corp', email: 'john@acme.com', phone: '555-0123', status: 'New', source: 'Website', dateAdded: 'Oct 24, 2023' },
-  { id: '2', name: 'Jane Smith', company: 'TechStart', email: 'jane@techstart.io', phone: '555-0124', status: 'Contacted', source: 'Referral', dateAdded: 'Oct 23, 2023' },
-  { id: '3', name: 'Bob Johnson', company: 'Global Ind.', email: 'bob@global.ind', phone: '555-0125', status: 'Won', source: 'LinkedIn', dateAdded: 'Oct 21, 2023' },
-];
+import { useLeads } from '../context/LeadContext';
 
-const STATUS_OPTIONS = ['All', 'New', 'Contacted', 'Meeting Scheduled', 'Proposal Sent', 'Won', 'Lost'];
 
 /**
  * Main Leads page component.
  * Manages the state for leads, modal, and view mode, along with search, filter, and sort functionality.
  */
 const Leads = () => {
-  const [leads, setLeads] = useState(initialLeads);
+  const { leads, addLead, updateLead, deleteLead } = useLeads();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState(null);
   const [viewMode, setViewMode] = useState('table'); // 'table' or 'card'
+
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (location.state?.action === 'add') {
+      setIsModalOpen(true);
+      // Clean up the state so it doesn't reopen if the user refreshes
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location, navigate]);
 
   // Search, Filter, and Sort State
   const [searchQuery, setSearchQuery] = useState('');
@@ -47,9 +53,9 @@ const Leads = () => {
         let valB = b[sortBy];
         
         // Convert dates to timestamps for comparison
-        if (sortBy === 'dateAdded') {
-          valA = new Date(valA).getTime();
-          valB = new Date(valB).getTime();
+        if (sortBy === 'dateAdded' || sortBy === 'createdAt') {
+          valA = new Date(valA || a.createdAt || a.dateAdded || 0).getTime();
+          valB = new Date(valB || b.createdAt || b.dateAdded || 0).getTime();
         } else {
           valA = String(valA).toLowerCase();
           valB = String(valB).toLowerCase();
@@ -74,16 +80,11 @@ const Leads = () => {
   const handleSubmit = (leadData) => {
     if (selectedLead) {
       // Edit mode
-      setLeads(leads.map(lead => lead.id === selectedLead.id ? { ...leadData, id: selectedLead.id, dateAdded: lead.dateAdded } : lead));
+      updateLead(selectedLead.id, leadData);
       toast.success('Lead updated successfully!', { duration: 3000, position: 'bottom-right' });
     } else {
       // Create mode
-      const newLead = {
-        ...leadData,
-        id: Date.now().toString(),
-        dateAdded: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-      };
-      setLeads([newLead, ...leads]);
+      addLead(leadData);
       toast.success('Lead created successfully!', { duration: 3000, position: 'bottom-right' });
     }
     handleCloseModal();
@@ -91,7 +92,7 @@ const Leads = () => {
 
   const handleDelete = (id) => {
     if (window.confirm('Are you sure you want to delete this lead?')) {
-      setLeads(leads.filter(lead => lead.id !== id));
+      deleteLead(id);
       toast.error('Lead deleted', { duration: 3000, position: 'bottom-right' });
     }
   };
@@ -101,30 +102,30 @@ const Leads = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 md:p-8">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-4 md:p-8">
       <Toaster />
       
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-slate-800">Leads</h1>
-            <p className="text-slate-500 text-sm mt-1">Manage and track your sales leads.</p>
+            <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200">Leads</h1>
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Manage and track your sales leads.</p>
           </div>
           
           <div className="flex items-center gap-3">
             {/* View Toggle */}
-            <div className="hidden sm:flex items-center bg-white border border-slate-200 rounded-lg p-1">
+            <div className="hidden sm:flex items-center bg-white dark:bg-gray-800 border border-slate-200 dark:border-slate-700 rounded-lg p-1">
               <button 
                 onClick={() => setViewMode('table')}
-                className={`p-1.5 rounded-md ${viewMode === 'table' ? 'bg-slate-100 text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}
+                className={`p-1.5 rounded-md ${viewMode === 'table' ? 'bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
                 aria-label="Table view"
               >
                 <List size={18} />
               </button>
               <button 
                 onClick={() => setViewMode('card')}
-                className={`p-1.5 rounded-md ${viewMode === 'card' ? 'bg-slate-100 text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}
+                className={`p-1.5 rounded-md ${viewMode === 'card' ? 'bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
                 aria-label="Card view"
               >
                 <LayoutGrid size={18} />
@@ -142,27 +143,27 @@ const Leads = () => {
         </div>
 
         {/* Toolbar: Search, Filter, Sort */}
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col gap-4">
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col gap-4">
           <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
             {/* Search */}
             <SearchBar value={searchQuery} onChange={setSearchQuery} />
 
             {/* Sort Options */}
             <div className="flex items-center gap-2 w-full lg:w-auto justify-end">
-              <span className="text-sm text-slate-500 hidden sm:inline-block">Sort by:</span>
+              <span className="text-sm text-slate-500 dark:text-slate-400 hidden sm:inline-block">Sort by:</span>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                className="border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800"
               >
-                <option value="dateAdded">Date Added</option>
+                <option value="createdAt">Date Added</option>
                 <option value="name">Name</option>
                 <option value="company">Company</option>
                 <option value="status">Status</option>
               </select>
               <button 
                 onClick={toggleSortOrder}
-                className="p-2 border border-slate-300 rounded-lg hover:bg-slate-50 text-slate-600 transition-colors"
+                className="p-2 border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 transition-colors"
                 title={sortOrder === 'asc' ? 'Ascending' : 'Descending'}
               >
                 <ArrowUpDown size={16} className={sortOrder === 'asc' ? 'rotate-180 transition-transform' : 'transition-transform'} />
@@ -170,7 +171,7 @@ const Leads = () => {
             </div>
           </div>
           
-          <div className="border-t border-slate-100 pt-4">
+          <div className="border-t border-slate-100 dark:border-slate-700 pt-4">
             <FilterBar activeFilter={activeFilter} onFilterChange={setActiveFilter} leads={leads} />
           </div>
         </div>
@@ -214,14 +215,14 @@ const Leads = () => {
       {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-slate-100 flex justify-between items-center sticky top-0 bg-white z-10">
-              <h2 className="text-xl font-bold text-slate-800">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center sticky top-0 bg-white dark:bg-gray-800 z-10">
+              <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200">
                 {selectedLead ? 'Edit Lead' : 'Add New Lead'}
               </h2>
               <button 
                 onClick={handleCloseModal}
-                className="text-slate-400 hover:text-slate-600 p-1"
+                className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:text-slate-400 p-1"
                 aria-label="Close modal"
               >
                 &times;

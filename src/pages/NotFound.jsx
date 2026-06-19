@@ -1,5 +1,4 @@
 // Import React to create the component
-import React from 'react';
 // Import Link component from React Router for client-side navigation
 import { Link } from 'react-router-dom';
 
@@ -8,15 +7,15 @@ const NotFound = () => {
   // Render the 404 UI
   return (
     // Center all content both vertically and horizontally within the full screen height
-    <div className="min-h-[calc(100vh-64px)] flex flex-col items-center justify-center bg-gray-50 px-4 text-center">
+    <div className="min-h-[calc(100vh-64px)] flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 px-4 text-center">
       {/* Large stylized '404' text acting as the main visual element */}
       <h1 className="text-9xl font-black text-blue-100 tracking-tighter">404</h1>
       
       {/* Secondary heading indicating what the error is */}
-      <h2 className="text-4xl font-bold text-gray-900 mt-4 mb-3">Page Not Found</h2>
+      <h2 className="text-4xl font-bold text-gray-900 dark:text-white mt-4 mb-3">Page Not Found</h2>
       
       {/* Friendly descriptive text explaining why the user might be seeing this page */}
-      <p className="text-lg text-gray-600 mb-8 max-w-md">
+      <p className="text-lg text-gray-600 dark:text-gray-400 dark:text-gray-400 mb-8 max-w-md">
         Oops! The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.
       </p>
       
