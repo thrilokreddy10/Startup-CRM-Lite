@@ -17,13 +17,18 @@ import { useLeads } from '../context/LeadContext';
  * Manages the state for leads, modal, and view mode, along with search, filter, and sort functionality.
  */
 const Leads = () => {
-  const { leads, addLead, updateLead, deleteLead } = useLeads();
+  const { leads, addLead, updateLead, deleteLead, fetchLeads } = useLeads();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState(null);
   const [viewMode, setViewMode] = useState('table'); // 'table' or 'card'
 
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Fetch leads from the backend when this page mounts
+  useEffect(() => {
+    fetchLeads();
+  }, []);
 
   useEffect(() => {
     if (location.state?.action === 'add') {
