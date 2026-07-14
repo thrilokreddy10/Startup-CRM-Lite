@@ -1,28 +1,40 @@
-// Import tools for lazy loading components
 import { lazy, Suspense } from 'react';
-// Import routing components from React Router v6
-import { Routes, Route } from 'react-router-dom';
-
-// Import the new responsive Sidebar component
+import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
+import { useAuth } from '../context/AuthContext';
 
-// Dynamically import the page components using React.lazy for code splitting.
+// Dynamically import the page components using React.lazy for code splitting
 const Dashboard = lazy(() => import('../pages/Dashboard'));
 const Leads = lazy(() => import('../pages/Leads'));
 const Analytics = lazy(() => import('../pages/Analytics'));
 const NotFound = lazy(() => import('../pages/NotFound'));
+const Login = lazy(() => import('../pages/Login'));
+const Register = lazy(() => import('../pages/Register'));
 
-// Define the AppRoutes component responsible for all routing logic
-const AppRoutes = () => {
+/**
+ * ProtectedRoute checks if the user is authenticated.
+ * If loading, shows a spinner.
+ * If no token, redirects to /login.
+ * Otherwise renders the nested routes via <Outlet /> along with the Sidebar layout.
+ */
+const ProtectedRoute = () => {
+  const { token, isLoading } = useAuth();
+  
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen w-full bg-gray-50 dark:bg-gray-900">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+  
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+  
   return (
-    // Wrap the entire application in a flex container that spans the screen's height.
-    // 'md:flex-row' ensures side-by-side layout on desktop, and 'flex-col' keeps it stacked on mobile (topbar + content).
     <div className="flex flex-col md:flex-row h-screen bg-gray-50 dark:bg-gray-900 font-sans text-gray-900 dark:text-white overflow-hidden max-w-[1440px] mx-auto w-full">
-
-      {/* Sidebar handles both the mobile top header and the sliding/fixed side navigation */}
       <Sidebar />
-
-      {/* Main content area that will expand to fill available space and allow scrolling */}
       <main className="flex-1 overflow-y-auto w-full relative">
         <Suspense
           fallback={
@@ -31,17 +43,37 @@ const AppRoutes = () => {
             </div>
           }
         >
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/leads" element={<Leads />} />
-            <Route path="/analytics" element={<Analytics />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <Outlet />
         </Suspense>
       </main>
     </div>
   );
 };
 
-// Export the AppRoutes component to be included in App.jsx
+const AppRoutes = () => {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center h-screen w-full">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      }
+    >
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        
+        {/* Protected Routes (Dashboard, Leads, Analytics) */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/leads" element={<Leads />} />
+          <Route path="/analytics" element={<Analytics />} />
+          <Route path="*" element={<NotFound />} />
+        </Route>
+      </Routes>
+    </Suspense>
+  );
+};
+
 export default AppRoutes;
