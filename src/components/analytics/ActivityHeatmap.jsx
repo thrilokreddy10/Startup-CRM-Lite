@@ -1,4 +1,4 @@
-3import React from 'react';
+import React from 'react';
 
 const ActivityHeatmap = ({ data }) => {
   // Simplified heatmap: show last 30 days of activity
